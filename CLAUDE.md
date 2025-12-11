@@ -4,151 +4,249 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is "Make It Red", a sample plugin for Zotero 7 that demonstrates the evolution of Zotero plugin architecture across multiple versions. The plugin serves as a reference implementation showing migration paths from Zotero 6 overlay plugins to modern Zotero 7 plugins.
+ZApi is a Zotero 7 plugin that provides REST API endpoints and Model Context Protocol (MCP) integration for accessing Zotero library data. The plugin runs an HTTP server within Zotero that AI clients can connect to via MCP protocol to search, retrieve, and analyze research items, annotations, PDFs, and collections.
 
 ## Build Commands
 
 ```bash
-# Build all plugin versions (creates XPI files in build/)
-./make-zips
+# Build the plugin (creates XPI in .scaffold/build/)
+npm run build
+
+# Start development server with hot reload
+npm run start
+
+# Run tests
+npm run test
+
+# Lint code
+npm run lint:check
+npm run lint:fix
+
+# Clean build artifacts
+npm run clean
 ```
 
-This script:
-- Creates XPI packages from each src-X.X folder
-- Generates update manifests with SHA256 hashes
-- Sets up update chains allowing upgrades between versions
-
-## Testing and Development
-
-**Manual Testing**: Install XPIs via Zotero Add-ons window, or see [Setting Up a Plugin Development Environment](https://www.zotero.org/support/dev/client_coding/plugin_development#setting_up_a_plugin_development_environment) to run from source.
-
-**No automated tests**: This is a reference plugin demonstrating patterns, not a production codebase with test infrastructure.
+The build process:
+1. Uses `zotero-plugin-scaffold` to bundle TypeScript source
+2. Compiles TypeScript with esbuild (target: Firefox 115)
+3. Entry point: `src/index.ts` → `.scaffold/build/addon/content/scripts/zapi.js`
+4. Processes template variables in `addon/manifest.json` and `addon/bootstrap.js`
+5. Creates XPI package in `.scaffold/build/`
 
 ## Architecture Overview
 
-### Version Structure
+### Build System
 
-The codebase contains four evolutionary versions demonstrating different plugin architectures:
+This plugin uses the **zotero-plugin-scaffold** system (NOT the legacy Make It Red approach). Key differences:
 
-- **src-1.0**: Overlay plugin for Zotero 6 (legacy XUL overlay architecture)
-- **src-1.1**: Hybrid plugin (overlay for Zotero 6, bootstrap for Zotero 7)
-- **src-1.2**: Bootstrapped plugin for both Zotero 6 and 7
-- **src-2.0**: Native Zotero 7 plugin (modern, simplified)
+- **Modern build**: Uses `zotero-plugin-scaffold` CLI with esbuild bundling
+- **Configuration**: `zotero-plugin.config.ts` defines build settings
+- **Bootstrap pattern**: `addon/bootstrap.js` is a template that registers the plugin
+- **Template variables**: `__addonRef__`, `__addonInstance__`, `__addonName__`, etc. are replaced during build
 
-### Plugin Lifecycle (Bootstrap Pattern)
+### Plugin Lifecycle
 
-Bootstrap plugins (src-1.2 and src-2.0) follow this lifecycle:
+The plugin follows Zotero 7's bootstrap architecture:
 
-1. **startup()** - Called when plugin loads
-   - In src-1.2: Includes `waitForZotero()` for async initialization and platform detection
-   - Loads `make-it-red.js` via `Services.scriptloader.loadSubScript()`
-   - Calls `MakeItRed.init()`, `MakeItRed.addToAllWindows()`, `MakeItRed.main()`
+1. **startup()** (in `addon/bootstrap.js`)
+   - Registers chrome manifest
+   - Loads bundled script into sandbox context (`ctx`)
+   - Calls `Zotero.__addonInstance__.hooks.onStartup()`
 
-2. **onMainWindowLoad()** - Called for each Zotero window
-   - Calls `MakeItRed.addToWindow(window)` to inject UI elements
+2. **onStartup()** (in `src/hooks.ts`)
+   - Waits for Zotero initialization promises
+   - Initializes MCP settings with defaults
+   - Starts HTTP server if enabled
+   - Registers preference change observers
+   - Shows first-install configuration prompt
 
-3. **onMainWindowUnload()** - Called when window closes
-   - Calls `MakeItRed.removeFromWindow(window)` for cleanup
+3. **onMainWindowLoad()** / **onMainWindowUnload()**
+   - Per-window initialization
+   - Loads Fluent localization files
 
-4. **shutdown()** - Called when plugin unloads
-   - Calls `MakeItRed.removeFromAllWindows()`
-   - Cleans up global `MakeItRed` object
+4. **shutdown()**
+   - Stops HTTP server
+   - Cleans up observers and ztoolkit registrations
 
-### Core Plugin Pattern
+### Code Structure
 
-Each version implements a singleton `MakeItRed` object with these key methods:
+**Entry Points:**
+- `src/index.ts` - Creates global `addon` object and initializes toolkit
+- `src/addon.ts` - Main `Addon` class containing data and API surface
+- `src/hooks.ts` - Lifecycle event handlers (startup, shutdown, window load/unload, prefs)
 
-```javascript
-MakeItRed = {
-  init({ id, version, rootURI })     // Initialize plugin metadata
-  addToWindow(window)                 // Inject UI into specific window
-  addToAllWindows()                   // Apply to all open Zotero windows
-  removeFromWindow(window)            // Clean up from specific window
-  removeFromAllWindows()              // Clean up from all windows
-  storeAddedElement(elem)             // Track elements for cleanup
-  main()                              // Main async initialization logic
+**Core Services:**
+- `src/modules/httpServer.ts` - Main HTTP server class using nsIServerSocket
+- `src/modules/streamableMCPServer.ts` - MCP protocol implementation
+- `src/modules/apiHandlers.ts` - REST endpoint handlers for search, collections, etc.
+- `src/modules/serverPreferences.ts` - Manages server port and enabled state
+
+**Content Processing:**
+- `src/modules/unifiedContentExtractor.ts` - Extracts fulltext from PDFs, notes, webpages
+- `src/modules/smartAnnotationExtractor.ts` - Processes annotations and highlights
+- `src/modules/searchEngine.ts` - Advanced search with relevance scoring
+- `src/modules/aiInstructionsManager.ts` - Adds AI guidance to response metadata
+
+**Utilities:**
+- `src/utils/ztoolkit.ts` - Creates ZToolkit instance for UI operations
+- `src/utils/prefs.ts` - Preference management helpers
+- `src/utils/locale.ts` - Localization utilities
+
+### HTTP Server Implementation
+
+The server runs on port 3000 (configurable) and handles:
+
+**MCP Endpoints:**
+- `POST /mcp` - Main MCP protocol endpoint (JSON-RPC 2.0)
+- `GET /mcp/status` - Server status and capabilities
+- `GET /capabilities` or `/help` - Full API documentation
+
+**Testing Endpoints:**
+- `GET /ping` - Health check (returns "pong")
+- `GET /test/mcp` - Integration testing
+
+**Key Implementation Details:**
+- Uses Firefox's `nsIServerSocket` for networking
+- Custom request parsing with UTF-8 converter streams
+- Session management for MCP connections (30s keep-alive, 5min timeout)
+- Graceful handling of empty connections (health checks)
+
+### MCP Protocol Integration
+
+The plugin implements MCP (Model Context Protocol) for AI client integration:
+
+**Available MCP Tools:**
+- `search_library` - Advanced search with fulltext, boolean operators, relevance scoring
+- `search_annotations` - Search notes and PDF annotations
+- `search_fulltext` - Search within fulltext content with context
+- `get_item_details` - Get metadata for specific items
+- `get_item_fulltext` - Get comprehensive fulltext (PDFs, notes, abstracts, webpages)
+- `get_attachment_content` - Extract text from specific attachments
+- `get_annotation_by_id` - Retrieve specific annotation content
+- `get_annotations_batch` - Batch retrieve multiple annotations
+- `get_collections` - List all collections
+- `search_collections` - Search collections by name
+- `get_collection_details` - Get collection metadata
+- `get_collection_items` - Get items in a collection
+
+**MCP Response Structure:**
+All MCP responses follow a unified structure with:
+- `data` - The actual response content
+- `metadata` - Response metadata including AI guidelines and tool-specific guidance
+- `_dataIntegrity` - Hash for data validation (added by AIInstructionsManager)
+- `_instructions` - AI processing instructions
+
+### Global Variables and Context
+
+The plugin uses a sandbox context system:
+
+```typescript
+// In addon/bootstrap.js (template):
+const ctx = { rootURI };
+ctx._globalThis = ctx;
+Services.scriptloader.loadSubScript(`${rootURI}/content/scripts/zapi.js`, ctx);
+```
+
+**Global variables available in bundled code:**
+- `_globalThis` - Sandbox root object
+- `addon` - Main Addon instance (assigned to `Zotero.ZApiPlugin`)
+- `ztoolkit` - ZToolkit instance for UI operations
+- `Zotero` - Zotero API object
+
+### Configuration and Preferences
+
+**Build Configuration** (`package.json`):
+```json
+{
+  "config": {
+    "addonName": "Make It Red",
+    "addonID": "zapi@gmail.com",
+    "addonRef": "zapi",
+    "addonInstance": "ZApiPlugin",
+    "prefsPrefix": "extensions.zotero.zapi"
+  }
 }
 ```
 
-The `addedElementIDs` array tracks all created DOM elements to ensure proper cleanup on shutdown.
+**Zotero Preferences:**
+- `extensions.zotero.zotero-mcp-plugin.mcp.server.enabled` - Enable/disable server
+- `extensions.zotero.zotero-mcp-plugin.mcp.server.port` - Server port (default: 3000)
+- `mcp.firstInstallPromptShown` - First-install prompt flag
 
-### Key Architectural Differences
+Note: The codebase uses `zotero-mcp-plugin` prefix for many preferences (legacy naming).
 
-**src-1.2 (Zotero 6/7 compatibility)**:
-- Uses `document.createElementNS()` for XUL elements
-- Includes `waitForZotero()` to handle async initialization
-- Platform version detection: `Zotero.platformMajorVersion < 102`
-- Loads preference defaults via `setDefaultPrefs()` in bootstrap
+### Important Implementation Notes
 
-**src-2.0 (Zotero 7 only)**:
-- Uses modern `createXULElement()` method
-- Assumes `Zotero` is always available at startup
-- Uses optional chaining (`?.`) freely
-- Registers preferences via `Zotero.PreferencePanes.register()`
-- Simplified manifest.json without install.rdf
+**Bootstrap Template Processing:**
+The `addon/bootstrap.js` file contains placeholders that are replaced during build:
+- `__addonRef__` → `zapi`
+- `__addonInstance__` → `ZApiPlugin`
 
-### Configuration Files
+**Type Definitions:**
+- `src/types.d.ts` - Contains Zotero-specific type definitions
+- `zotero-types` package provides official Zotero API types
+- TypeScript compilation uses `--noEmit` (type checking only)
 
-**Manifests**:
-- `install.rdf` (src-1.0 to src-1.2): Mozilla RDF format with plugin metadata
-- `manifest.json` (src-1.1 to src-2.0): WebExtension-style manifest with version constraints
-- src-2.0 uses only `manifest.json`
+**Localization:**
+- Uses Fluent format (`.ftl` files) in `addon/locale/`
+- Loaded via `MozXULElement.insertFTLIfNeeded()`
+- Files: `addon.ftl`, `preferences.ftl`, `mainWindow.ftl`
 
-**Chrome Manifest** (`chrome.manifest` in src-1.0 to src-1.2):
-- Maps virtual `chrome://` URIs to physical file paths
-- Registers content, localization, and skin resources
-- Not needed in src-2.0
+**Content Extraction:**
+The plugin can extract text from:
+- PDFs (via Zotero's fulltext API)
+- HTML snapshots (stored webpage content)
+- Notes (including rich text)
+- Annotations and highlights
 
-**Update Manifests**:
-- Template files: `updates-X.X.json.tmpl`
-- Generated by `make-zips` with SHA256 hashes
-- Demonstrates update chains: 1.0 → 1.1 → 1.2 → 2.0
-- Allows direct upgrades to 2.0 from Zotero 7
+### Development Workflow
 
-### Localization
+1. **Making changes:**
+   - Edit TypeScript files in `src/`
+   - Modify UI templates in `addon/content/`
+   - Update localization in `addon/locale/`
 
-- **src-1.0**: Uses `.properties` files (key=value format)
-- **src-1.1+**: Uses Fluent format (`.ftl` files) with `.properties` fallback for Zotero 6
-- Location: `locale/en-US/` for Fluent, `chrome/locale/en-US/` for legacy
+2. **Building:**
+   - Run `npm run build` to create XPI
+   - Output: `.scaffold/build/zapi.xpi`
 
-### Styling
+3. **Testing:**
+   - Install XPI in Zotero via Add-ons Manager
+   - Or set up plugin development environment (see Zotero docs)
+   - Check server status at `http://localhost:3000/capabilities`
 
-- CSS injected dynamically via `<link>` element in bootstrap versions
-- Uses attribute selectors for feature toggling: `window[data-green-instead]`
-- Loaded from `rootURI` using `Services.io.newURI()`
+4. **Debugging:**
+   - Use Zotero's DevTools (Tools → Developer → Run JavaScript)
+   - Check `Zotero.debug()` output in Zotero console
+   - Server logs appear in debug output with `[HttpServer]` or `[MCP]` prefixes
 
-## Important Notes for Development
+### Common Patterns
 
-### When Working with src-2.0 (Modern Zotero 7)
+**Logging:**
+```typescript
+ztoolkit.log(`Message`, "error" | "warn" | "info");  // Uses ztoolkit
+Zotero.debug(`[Plugin] Message`);  // Direct Zotero debug
+```
 
-- This version assumes Zotero 7.0+ and drops all Zotero 6 compatibility
-- Use `createXULElement()` instead of `createElementNS()`
-- No need to check if `Zotero` is defined - it's always available
-- Preference registration happens via `Zotero.PreferencePanes.register()`
+**Preference Access:**
+```typescript
+Zotero.Prefs.get("extensions.zotero.zapi.setting");
+Zotero.Prefs.set("extensions.zotero.zapi.setting", value);
+```
 
-### When Working with src-1.2 (Compatible Version)
-
-- Must handle both Zotero 6 and 7 differences
-- Always check `Zotero.platformMajorVersion` for Firefox version
-- Use `waitForZotero()` to ensure `Zotero` object is available
-- Load preference defaults in bootstrap for Zotero 6 compatibility
-
-### DOM Element Management
-
-All dynamically created elements must be:
-1. Created with appropriate namespace/method for the target version
-2. Registered via `storeAddedElement(elem)` for cleanup tracking
-3. Removed during shutdown in `removeFromWindow()` or `removeFromAllWindows()`
-
-This ensures clean uninstallation without leaving artifacts in Zotero's UI.
-
-### Plugin ID
-
-The plugin ID is `make-it-red@example.com`. Note that recent commits changed the domain from `zotero.org` to `example.com` - this is intentional for sample/template plugins.
+**Zotero API Usage:**
+```typescript
+const items = Zotero.Items.getAll();
+const item = Zotero.Items.get(itemID);
+const collections = Zotero.Collections.getAll();
+```
 
 ## Technology Stack
 
-- **Language**: Pure JavaScript (ES6+ with async/await)
-- **No build tools**: Direct JavaScript files, no transpilation
-- **No npm dependencies**: Standalone plugin using only Zotero and Firefox APIs
-- **No TypeScript**: Plain JavaScript throughout
+- **Language**: TypeScript (compiled to ES2020)
+- **Build Tool**: zotero-plugin-scaffold (with esbuild)
+- **Target**: Firefox 115+ (Zotero 7 runtime)
+- **Dependencies**:
+  - `zotero-plugin-toolkit` - UI and utility helpers
+  - `zotero-types` - TypeScript definitions for Zotero API
+- **No npm dependencies in runtime** - All code bundled into single JS file

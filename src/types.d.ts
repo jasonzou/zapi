@@ -1,5 +1,10 @@
 // Type definitions for Zotero 7 Plugin API
 
+import { ZoteroToolkit } from "zotero-plugin-toolkit";
+
+// Global ZToolkit type
+type ZToolkit = ZoteroToolkit;
+
 interface BootstrapParams {
   id: string;
   version: string;
@@ -64,4 +69,24 @@ interface XULElement extends HTMLElement {
 
 interface ZoteroDocument extends Document {
   createXULElement(tagName: string): XULElement;
+}
+
+// Global variables
+import type Addon from "./addon";
+
+declare global {
+  const __env__: "development" | "production";
+  const _globalThis: {
+    addon: Addon;
+    [key: string]: any;
+  };
+  const addon: Addon;
+  const ztoolkit: ZToolkit;
+
+  // Firefox XPCOM globals
+  const Cc: any;
+  const Ci: any;
+  const Cu: any;
+  const Cr: any;
+  const Components: any;
 }

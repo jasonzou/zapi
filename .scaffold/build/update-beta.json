@@ -1,0 +1,19 @@
+{
+  "addons": {
+    "zapi@gmail.com": {
+      "updates": [
+        {
+          "version": "0.0.1",
+          "update_link": "https://github.com/jasonzou/zapi/releases/download/v0.0.1/make-it-red.xpi",
+          "update_hash": "sha512:d7cedf26652de426d43029338fafaf236198a98acffa3bcd22711df9d7c67c2c92bbef2e4557114ce3458915c99cbe9265e485d8a267bd83910e39d2b4ecc6ac",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "6.999",
+              "strict_max_version": "8.*"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

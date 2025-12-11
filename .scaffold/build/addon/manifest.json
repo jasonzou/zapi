@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "Make It Red",
+  "version": "0.0.1",
+  "description": "A rest api endpoints for Zotero 7",
+  "homepage_url": "https://github.com/jasonzou/zapi",
+  "author": "jasonzou",
+  "icons": {
+    "48": "content/icons/favicon@0.5x.png",
+    "96": "content/icons/favicon.png"
+  },
+  "applications": {
+    "zotero": {
+      "id": "zapi@gmail.com",
+      "update_url": "https://github.com/jasonzou/zapi/releases/latest/download/update.json",
+      "strict_min_version": "6.999",
+      "strict_max_version": "8.*"
+    }
+  }
+}
