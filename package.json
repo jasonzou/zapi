@@ -1,0 +1,39 @@
+{
+  "name": "zapi",
+  "version": "0.0.1",
+  "description": "A rest api endpoints for Zotero 7",
+  "config": {
+    "addonName": "Make It Red",
+    "addonID": "zapi@gmail.com",
+    "addonRef": "zapi",
+    "addonInstance": "ZApiPlugin",
+    "prefsPrefix": "extensions.zotero.zapi"
+  },
+  "scripts": {
+    "start": "zotero-plugin serve",
+    "build": "zotero-plugin build && tsc --noEmit",
+    "lint:check": "prettier --check . && eslint .",
+    "lint:fix": "prettier --write . && eslint . --fix",
+    "release": "npm version patch --force -m \"Release v%s\" && git push --follow-tags",
+    "release:beta": "npm version prepatch --preid beta --force -m \"Release v%s\" && git push --follow-tags",
+    "prepare-release": "node scripts/prepare-release.js",
+    "release:init": "node scripts/init-release.js",
+    "test": "zotero-plugin test",
+    "test:update": "node scripts/test-update.js",
+    "update-deps": "npm update --save",
+    "clean": "rm -rf build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "zotero-plugin-scaffold": "^0.8.2",
+    "zotero-types": "^4.1.0-beta.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zotero/make-it-red"
+  },
+  "author": "jasonzou",
+  "homepage": "https://github.com/jasonzou/zapi",
+  "license": "AGPL-3.0"
+}

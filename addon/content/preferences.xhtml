@@ -1,0 +1,29 @@
+<vbox onload="MakeItRed_Preferences.init()">
+	<linkset>
+		<html:link rel="localization" href="make-it-red.ftl"/>
+	</linkset>
+	
+	<html:style>
+		#make-it-red-color {
+			width: 1em;
+			height: 1em;
+			padding: 0;
+			border: none;
+			appearance: none;
+		}
+	</html:style>
+
+	<groupbox>
+		<hbox align="center">
+			<html:label
+				for="make-it-red-color"
+				data-l10n-id="make-it-red-text-color"
+			></html:label>
+			<html:input
+				id="make-it-red-color"
+				preference="extensions.make-it-red.color" 
+				type="color"
+			></html:input>
+		</hbox>
+	</groupbox>
+</vbox>
