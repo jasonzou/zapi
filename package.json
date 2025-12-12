@@ -1,6 +1,6 @@
 {
   "name": "zapi",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A rest api endpoints for Zotero 7",
   "config": {
     "addonName": "ZApi",
