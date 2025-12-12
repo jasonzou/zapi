@@ -1,6 +1,6 @@
 import { config } from "../package.json";
 import { ColumnOptions, DialogHelper } from "zotero-plugin-toolkit";
-import { HttpServer, httpServer } from "./modules/httpServer";
+import { HttpServer } from "./modules/httpServer";
 import { serverPreferences } from "./modules/serverPreferences";
 import hooks from "./hooks";
 import { createZToolkit } from "./utils/ztoolkit";

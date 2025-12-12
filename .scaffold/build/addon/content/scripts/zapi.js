@@ -1156,7 +1156,7 @@
         static htmlToMarkdown(html, options) {
           let text = html;
           if (options.preserveHeadings) {
-            text = text.replace(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi, (match, level, content) => {
+            text = text.replace(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi, (_match, level, content) => {
               const hashes = "#".repeat(parseInt(level));
               const cleanContent = this.stripTags(content).trim();
               return `
@@ -1171,9 +1171,9 @@ ${hashes} ${cleanContent}
             text = text.replace(/<(em|i)[^>]*>(.*?)<\/\1>/gi, "*$2*");
           }
           if (options.preserveLists) {
-            text = text.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, content) => {
+            text = text.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (_match, content) => {
               let counter = 1;
-              const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch, liContent) => {
+              const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (_liMatch, liContent) => {
                 const cleanContent = this.stripTags(liContent).trim();
                 return `${counter++}. ${cleanContent}
 `;
@@ -1182,8 +1182,8 @@ ${hashes} ${cleanContent}
 ${listContent}
 `;
             });
-            text = text.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, content) => {
-              const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch, liContent) => {
+            text = text.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (_match, content) => {
+              const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (_liMatch, liContent) => {
                 const cleanContent = this.stripTags(liContent).trim();
                 return `\u2022 ${cleanContent}
 `;
@@ -1209,7 +1209,7 @@ ${listContent}
         static htmlToPlainText(html, options) {
           let text = html;
           if (options.preserveHeadings) {
-            text = text.replace(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi, (match, level, content) => {
+            text = text.replace(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi, (_match, level, content) => {
               const cleanContent = this.stripTags(content).trim();
               const indent = "=".repeat(Math.max(1, 7 - parseInt(level)));
               return `
@@ -1220,9 +1220,9 @@ ${indent} ${cleanContent.toUpperCase()} ${indent}
             });
           }
           if (options.preserveLists) {
-            text = text.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, content) => {
+            text = text.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (_match, content) => {
               let counter = 1;
-              const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch, liContent) => {
+              const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (_liMatch, liContent) => {
                 const cleanContent = this.stripTags(liContent).trim();
                 const indent = " ".repeat(options.indentSize || 2);
                 return `
@@ -1233,8 +1233,8 @@ ${listContent}
 
 `;
             });
-            text = text.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, content) => {
-              const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch, liContent) => {
+            text = text.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (_match, content) => {
+              const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (_liMatch, liContent) => {
                 const cleanContent = this.stripTags(liContent).trim();
                 const indent = " ".repeat(options.indentSize || 2);
                 return `
@@ -1253,7 +1253,7 @@ ${listContent}
           text = text.replace(/<br\s*\/?>/gi, "\n");
           text = text.replace(/<\/(div|section|article|header|footer|nav)>/gi, "\n\n");
           text = text.replace(/<(div|section|article|header|footer|nav)[^>]*>/gi, "");
-          text = text.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis, (match, content) => {
+          text = text.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis, (_match, content) => {
             const cleanContent = this.stripTags(content).trim();
             const indent = " ".repeat(options.indentSize || 2);
             const indentedText = cleanContent.split("\n").map(
@@ -1930,7 +1930,6 @@ ${indentedText}
       const offset = parseInt(query.get("offset") || "0", 10);
       const sort = query.get("sort") || "name";
       const direction = query.get("direction") || "asc";
-      const includeSubcollections = query.get("includeSubcollections") === "true";
       const parentCollection = query.get("parentCollection");
       let collectionIDs;
       if (parentCollection) {
@@ -3087,7 +3086,6 @@ ${indentedText}
          */
         calculateTfIdf(sentences, fullText) {
           const allWords = this.tokenize(fullText.toLowerCase());
-          const wordCount = allWords.length;
           const uniqueWords = [...new Set(allWords)];
           const documentFreq = /* @__PURE__ */ new Map();
           uniqueWords.forEach((word) => {
@@ -3224,7 +3222,7 @@ ${indentedText}
         /**
          * Special selection logic for minimal mode to prioritize main content
          */
-        selectMinimalContent(sentences, limits, contentControl) {
+        selectMinimalContent(sentences, limits, _contentControl) {
           const mainContent = sentences.filter((s) => s.contentType === "main_content");
           const otherContent = sentences.filter((s) => s.contentType !== "main_content");
           ztoolkit.log(`[IntelligentProcessor] Minimal mode: ${mainContent.length} main, ${otherContent.length} other sentences`);
@@ -3385,7 +3383,7 @@ ${indentedText}
         /**
          * Detect content sections and classify importance
          */
-        classifyContentSection(sentence, position) {
+        classifyContentSection(sentence, _position) {
           if (this.isReference(sentence)) {
             return "reference";
           }
@@ -3894,7 +3892,6 @@ ${result.content.webpage.content}
          * Get mode-specific configuration
          */
         getModeConfiguration(mode) {
-          const presets = MCPSettingsService.getEffectiveSettings();
           const modeConfigs = {
             "minimal": {
               maxContentLength: 500,
@@ -5802,7 +5799,7 @@ Comment: ${annotation.comment}` : "";
         }
         async callGetItemDetails(args) {
           const { itemKey, mode } = args;
-          const { handleGetItem: handleGetItem3 } = await Promise.resolve().then(() => (init_apiHandlers(), apiHandlers_exports));
+          const { handleGetItem: handleGetItem2 } = await Promise.resolve().then(() => (init_apiHandlers(), apiHandlers_exports));
           const effectiveMode = mode || MCPSettingsService.get("content.mode");
           const queryParams = new URLSearchParams();
           if (effectiveMode !== "complete") {
@@ -5811,7 +5808,7 @@ Comment: ${annotation.comment}` : "";
               queryParams.append("fields", modeConfig.fields.join(","));
             }
           }
-          const response = await handleGetItem3({ 1: itemKey }, queryParams);
+          const response = await handleGetItem2({ 1: itemKey }, queryParams);
           let result = response.body ? JSON.parse(response.body) : response;
           if (result && typeof result === "object") {
             result.metadata = {
@@ -5959,138 +5956,158 @@ Comment: ${annotation.comment}` : "";
         }
         /**
          * Format tool result for MCP response with intelligent content type detection
+         * @deprecated - Not currently used but kept for future reference
          */
-        formatToolResult(result, toolName, args) {
-          const requestedTextFormat = args?.format === "text";
-          if (typeof result === "string") {
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: result
-                }
-              ],
-              isError: false
-            };
-          }
-          if (typeof result === "object" && result !== null) {
-            if (requestedTextFormat) {
+        /*
+          private _formatToolResult(result: any, toolName: string, args: any): any {
+            // Check if client explicitly requested text format
+            const requestedTextFormat = args?.format === 'text';
+        
+            // If result is already a string (text format), wrap it in MCP content format
+            if (typeof result === 'string') {
               return {
                 content: [
                   {
-                    type: "text",
-                    text: this.formatObjectAsText(result, toolName)
-                  }
+                    type: 'text',
+                    text: result,
+                  },
                 ],
-                isError: false
+                isError: false,
               };
             }
+        
+            // For structured data, provide both JSON and formatted options
+            if (typeof result === 'object' && result !== null) {
+              // If explicitly requested text format, convert to readable text
+              if (requestedTextFormat) {
+                return {
+                  content: [
+                    {
+                      type: 'text',
+                      text: this.formatObjectAsText(result, toolName),
+                    },
+                  ],
+                  isError: false,
+                };
+              }
+        
+              // Default: provide structured JSON with formatted preview
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2),
+                  },
+                ],
+                isError: false,
+                // Include raw structured data for programmatic access
+                _structuredData: result,
+                _contentType: 'application/json'
+              };
+            }
+        
+            // Fallback for other types
             return {
               content: [
                 {
-                  type: "text",
-                  text: JSON.stringify(result, null, 2)
-                }
+                  type: 'text',
+                  text: String(result),
+                },
               ],
               isError: false,
-              // Include raw structured data for programmatic access
-              _structuredData: result,
-              _contentType: "application/json"
             };
           }
-          return {
-            content: [
-              {
-                type: "text",
-                text: String(result)
-              }
-            ],
-            isError: false
-          };
-        }
-        /**
-         * Format object as human-readable text based on tool type
-         */
-        formatObjectAsText(obj, toolName) {
-          switch (toolName) {
-            case "get_content":
-              return this.formatContentAsText(obj);
-            case "search_library":
-              return this.formatSearchResultsAsText(obj);
-            case "get_annotations":
-              return this.formatAnnotationsAsText(obj);
-            default:
-              return JSON.stringify(obj, null, 2);
-          }
-        }
-        formatContentAsText(contentResult) {
-          const parts = [];
-          if (contentResult.title) {
-            parts.push(`TITLE: ${contentResult.title}
-`);
-          }
-          if (contentResult.content) {
-            if (contentResult.content.abstract) {
-              parts.push(`ABSTRACT:
-${contentResult.content.abstract.content}
-`);
+          */
+        /*
+           * Format object as human-readable text based on tool type
+           * @deprecated - Not currently used but kept for future reference
+           *
+          private _formatObjectAsText(obj: any, toolName: string): string {
+            switch (toolName) {
+              case 'get_content':
+                return this._formatContentAsText(obj);
+              case 'search_library':
+                return this._formatSearchResultsAsText(obj);
+              case 'get_annotations':
+                return this._formatAnnotationsAsText(obj);
+              default:
+                return JSON.stringify(obj, null, 2);
             }
-            if (contentResult.content.attachments) {
-              for (const att of contentResult.content.attachments) {
-                parts.push(`ATTACHMENT (${att.filename || att.type}):
-${att.content}
-`);
+          }
+        
+          private _formatContentAsText(contentResult: any): string {
+            const parts = [];
+        
+            if (contentResult.title) {
+              parts.push(`TITLE: ${contentResult.title}\n`);
+            }
+        
+            if (contentResult.content) {
+              if (contentResult.content.abstract) {
+                parts.push(`ABSTRACT:\n${contentResult.content.abstract.content}\n`);
+              }
+        
+              if (contentResult.content.attachments) {
+                for (const att of contentResult.content.attachments) {
+                  parts.push(`ATTACHMENT (${att.filename || att.type}):\n${att.content}\n`);
+                }
+              }
+        
+              if (contentResult.content.notes) {
+                for (const note of contentResult.content.notes) {
+                  parts.push(`NOTE (${note.title}):\n${note.content}\n`);
+                }
               }
             }
-            if (contentResult.content.notes) {
-              for (const note of contentResult.content.notes) {
-                parts.push(`NOTE (${note.title}):
-${note.content}
-`);
+        
+            return parts.join('\n---\n\n');
+          }
+        
+          private _formatSearchResultsAsText(searchResult: any): string {
+            if (!searchResult.results || !Array.isArray(searchResult.results)) {
+              return JSON.stringify(searchResult, null, 2);
+            }
+        
+            const parts = [`SEARCH RESULTS (${searchResult.results.length} items):\n`];
+        
+            searchResult.results.forEach((item: any, index: number) => {
+              parts.push(`${index + 1}. ${item.title || 'Untitled'}`);
+              if (item.creators && item.creators.length > 0) {
+                parts.push(`   Authors: ${item.creators.map((c: any) => c.name || `${c.firstName} ${c.lastName}`).join(', ')}`);
               }
-            }
+              if (item.date) {
+                parts.push(`   Date: ${item.date}`);
+              }
+              if (item.itemKey) {
+                parts.push(`   Key: ${item.itemKey}`);
+              }
+              parts.push('');
+            });
+        
+            return parts.join('\n');
           }
-          return parts.join("\n---\n\n");
-        }
-        formatSearchResultsAsText(searchResult) {
-          if (!searchResult.results || !Array.isArray(searchResult.results)) {
-            return JSON.stringify(searchResult, null, 2);
+        
+          private _formatAnnotationsAsText(annotationResult: any): string {
+            if (!annotationResult.data || !Array.isArray(annotationResult.data)) {
+              return JSON.stringify(annotationResult, null, 2);
+            }
+        
+            const parts = [`ANNOTATIONS (${annotationResult.data.length} items):\n`];
+        
+            annotationResult.data.forEach((ann: any, index: number) => {
+              parts.push(`${index + 1}. [${ann.type.toUpperCase()}] ${ann.content}`);
+              if (ann.page) {
+                parts.push(`   Page: ${ann.page}`);
+              }
+              if (ann.dateModified) {
+                parts.push(`   Modified: ${ann.dateModified}`);
+              }
+              parts.push('');
+            });
+        
+            return parts.join('\n');
           }
-          const parts = [`SEARCH RESULTS (${searchResult.results.length} items):
-`];
-          searchResult.results.forEach((item, index) => {
-            parts.push(`${index + 1}. ${item.title || "Untitled"}`);
-            if (item.creators && item.creators.length > 0) {
-              parts.push(`   Authors: ${item.creators.map((c) => c.name || `${c.firstName} ${c.lastName}`).join(", ")}`);
-            }
-            if (item.date) {
-              parts.push(`   Date: ${item.date}`);
-            }
-            if (item.itemKey) {
-              parts.push(`   Key: ${item.itemKey}`);
-            }
-            parts.push("");
-          });
-          return parts.join("\n");
-        }
-        formatAnnotationsAsText(annotationResult) {
-          if (!annotationResult.data || !Array.isArray(annotationResult.data)) {
-            return JSON.stringify(annotationResult, null, 2);
-          }
-          const parts = [`ANNOTATIONS (${annotationResult.data.length} items):
-`];
-          annotationResult.data.forEach((ann, index) => {
-            parts.push(`${index + 1}. [${ann.type.toUpperCase()}] ${ann.content}`);
-            if (ann.page) {
-              parts.push(`   Page: ${ann.page}`);
-            }
-            if (ann.dateModified) {
-              parts.push(`   Modified: ${ann.dateModified}`);
-            }
-            parts.push("");
-          });
-          return parts.join("\n");
-        }
+          */
         createResponse(id, result) {
           return {
             jsonrpc: "2.0",
@@ -9814,7 +9831,7 @@ html {
 
   // package.json
   var config = {
-    addonName: "Make It Red",
+    addonName: "ZApi",
     addonID: "zapi@gmail.com",
     addonRef: "zapi",
     addonInstance: "ZApiPlugin",
@@ -9981,13 +9998,12 @@ html {
           let input = null;
           let output = null;
           let sin = null;
-          const converterStream = null;
           ztoolkit.log(`[HttpServer] New connection accepted from transport: ${transport.host || "unknown"}:${transport.port || "unknown"}`);
           try {
             input = transport.openInputStream(0, 0, 0);
             output = transport.openOutputStream(0, 0, 0);
-            const converterStream2 = Cc["@mozilla.org/intl/converter-input-stream;1"].createInstance(Ci.nsIConverterInputStream);
-            converterStream2.init(input, "UTF-8", 0, 0);
+            const converterStream = Cc["@mozilla.org/intl/converter-input-stream;1"].createInstance(Ci.nsIConverterInputStream);
+            converterStream.init(input, "UTF-8", 0, 0);
             sin = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(
               Ci.nsIScriptableInputStream
             );
@@ -10015,7 +10031,7 @@ html {
                 let chunk = "";
                 try {
                   const str = {};
-                  const bytesRead = converterStream2.readString(bytesToRead, str);
+                  const bytesRead = converterStream.readString(bytesToRead, str);
                   chunk = str.value || "";
                   if (bytesRead === 0) break;
                 } catch (converterError) {
@@ -10041,7 +10057,7 @@ html {
             }
             ztoolkit.log(`[HttpServer] Total bytes read: ${totalBytesRead}, request text length: ${requestText.length}`);
             try {
-              if (converterStream2) converterStream2.close();
+              if (converterStream) converterStream.close();
             } catch (e) {
               ztoolkit.log(
                 `[HttpServer] Error closing converter stream: ${e}`,
@@ -10091,7 +10107,6 @@ html {
               const method = requestParts[0];
               const urlPath = requestParts[1];
               const url = new URL(urlPath, "http://127.0.0.1");
-              const query = new URLSearchParams(url.search);
               const path = url.pathname;
               let requestBody = "";
               if (method === "POST") {
@@ -10948,6 +10963,18 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
   };
   var serverPreferences = new ServerPreferences();
 
+  // src/modules/examples.ts
+  var BasicExampleFactory = class {
+    static registerPrefs() {
+      Zotero.PreferencePanes.register({
+        pluginID: addon.data.config.addonID,
+        src: rootURI + "content/preferences.xhtml",
+        scripts: [],
+        image: `chrome://${addon.data.config.addonRef}/content/icons/favicon.png`
+      });
+    }
+  };
+
   // src/utils/locale.ts
   function initLocale() {
     const l10n = new (typeof Localization === "undefined" ? ztoolkit.getGlobal("Localization") : Localization)([`${config.addonRef}-addon.ftl`], true);
@@ -10989,19 +11016,13 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
     }
   }
 
-  // src/modules/examples.ts
-  var BasicExampleFactory = class {
-    static registerPrefs() {
-      Zotero.PreferencePanes.register({
-        pluginID: addon.data.config.addonID,
-        src: rootURI + "content/preferences.xhtml",
-        label: getString("prefs-title"),
-        image: `chrome://${addon.data.config.addonRef}/content/icons/favicon.png`
-      });
-    }
-  };
-
   // src/modules/clientConfigGenerator.ts
+  var getString2 = (key, options) => {
+    if (options) {
+      return getString(key, options);
+    }
+    return getString(key);
+  };
   var ClientConfigGenerator = class {
     static {
       this.CLIENT_CONFIGS = [
@@ -11063,7 +11084,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
               }
             }
           }),
-          getInstructions: () => getString("claude-desktop-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("claude-desktop-instructions").split("\n").filter((s) => s.trim())
         },
         {
           name: "cline-vscode",
@@ -11080,7 +11101,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
               }
             }
           }),
-          getInstructions: () => getString("cline-vscode-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("cline-vscode-instructions").split("\n").filter((s) => s.trim())
         },
         {
           name: "continue-dev",
@@ -11100,7 +11121,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
               ]
             }
           }),
-          getInstructions: () => getString("continue-dev-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("continue-dev-instructions").split("\n").filter((s) => s.trim())
         },
         {
           name: "cursor",
@@ -11115,7 +11136,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
               }
             }
           }),
-          getInstructions: () => getString("cursor-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("cursor-instructions").split("\n").filter((s) => s.trim())
         },
         {
           name: "cherry-studio",
@@ -11132,7 +11153,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
               }
             }
           }),
-          getInstructions: () => getString("cherry-studio-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("cherry-studio-instructions").split("\n").filter((s) => s.trim())
         },
         {
           name: "gemini-cli",
@@ -11150,7 +11171,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
               }
             }
           }),
-          getInstructions: () => getString("gemini-cli-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("gemini-cli-instructions").split("\n").filter((s) => s.trim())
         },
         {
           name: "chatbox",
@@ -11165,7 +11186,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
               }
             }
           }),
-          getInstructions: () => getString("chatbox-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("chatbox-instructions").split("\n").filter((s) => s.trim())
         },
         {
           name: "trae-ai",
@@ -11180,7 +11201,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
               }
             }
           }),
-          getInstructions: () => getString("trae-ai-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("trae-ai-instructions").split("\n").filter((s) => s.trim())
         },
         {
           name: "qwen-code",
@@ -11254,7 +11275,7 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
             },
             connectionTest: `curl -X POST http://127.0.0.1:${port}/mcp -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"ping","params":{}}'`
           }),
-          getInstructions: () => getString("custom-http-instructions").split("\n").filter((s) => s.trim())
+          getInstructions: () => getString2("custom-http-instructions").split("\n").filter((s) => s.trim())
         }
       ];
     }
@@ -11281,28 +11302,28 @@ Keep-Alive: timeout=${this.keepAliveTimeout / 1e3}, max=100\r
       const config2 = this.generateConfig(clientName, port, serverName);
       const instructions = this.getInstructions(clientName, port);
       const actualServerName = serverName || "zotero-mcp";
-      return `${getString("config-guide-header", { args: { clientName: client.displayName } })}
+      return `${getString2("config-guide-header", { args: { clientName: client.displayName } })}
 
-${getString("config-guide-server-info")}
-${getString("config-guide-server-name", { args: { serverName: actualServerName } })}
-${getString("config-guide-server-port", { args: { port: port.toString() } })}
-${getString("config-guide-server-endpoint", { args: { port: port.toString() } })}
+${getString2("config-guide-server-info")}
+${getString2("config-guide-server-name", { args: { serverName: actualServerName } })}
+${getString2("config-guide-server-port", { args: { port: port.toString() } })}
+${getString2("config-guide-server-endpoint", { args: { port: port.toString() } })}
 
-${getString("config-guide-json-header")}
+${getString2("config-guide-json-header")}
 \`\`\`json
 ${config2}
 \`\`\`
 
-${getString("config-guide-steps-header")}
+${getString2("config-guide-steps-header")}
 ${instructions.map((instruction) => instruction).join("\n")}
 
-${getString("config-guide-tools-header")}
-${getString("config-guide-tools-list")}
+${getString2("config-guide-tools-header")}
+${getString2("config-guide-tools-list")}
 
-${getString("config-guide-troubleshooting-header")}
-${getString("config-guide-troubleshooting-list")}
+${getString2("config-guide-troubleshooting-header")}
+${getString2("config-guide-troubleshooting-list")}
 
-${getString("config-guide-generated-time", { args: { time: (/* @__PURE__ */ new Date()).toLocaleString() } })}
+${getString2("config-guide-generated-time", { args: { time: (/* @__PURE__ */ new Date()).toLocaleString() } })}
 `;
     }
     static async copyToClipboard(text) {
@@ -11387,20 +11408,20 @@ ${getString("config-guide-generated-time", { args: { time: (/* @__PURE__ */ new 
         const verify = Zotero.Prefs.get("extensions.zotero.zotero-mcp-plugin.mcp.server.enabled", true);
         ztoolkit.log(`[PreferenceScript] Verified preference value: ${verify}`);
         try {
-          const httpServer3 = addon.data.httpServer;
-          if (httpServer3) {
+          const httpServer2 = addon.data.httpServer;
+          if (httpServer2) {
             if (checked) {
               ztoolkit.log(`[PreferenceScript] Starting server manually...`);
-              if (!httpServer3.isServerRunning()) {
+              if (!httpServer2.isServerRunning()) {
                 const portPref = Zotero.Prefs.get("extensions.zotero.zotero-mcp-plugin.mcp.server.port", true);
                 const port = typeof portPref === "number" ? portPref : 23120;
-                httpServer3.start(port);
+                httpServer2.start(port);
                 ztoolkit.log(`[PreferenceScript] Server started on port ${port}`);
               }
             } else {
               ztoolkit.log(`[PreferenceScript] Stopping server manually...`);
-              if (httpServer3.isServerRunning()) {
-                httpServer3.stop();
+              if (httpServer2.isServerRunning()) {
+                httpServer2.stop();
                 ztoolkit.log(`[PreferenceScript] Server stopped`);
               }
             }
@@ -11645,7 +11666,7 @@ ${getString("config-guide-generated-time", { args: { time: (/* @__PURE__ */ new 
       `${addon.data.config.addonRef}-preferences.ftl`
     );
   }
-  async function onMainWindowUnload(win) {
+  async function onMainWindowUnload(_win) {
     ztoolkit.unregisterAll();
   }
   function onShutdown() {
@@ -11756,7 +11777,7 @@ ${openPrefsText} (OK) / ${laterText} (Cancel)`;
     } catch (error) {
       ztoolkit.log(`[MCP Plugin] Error opening preferences: ${error}`, "error");
       try {
-        Zotero.getMainWindow().openPreferences();
+        Zotero.getMainWindow()?.openPreferences?.();
       } catch (fallbackError) {
         ztoolkit.log(`[MCP Plugin] Fallback preferences open failed: ${fallbackError}`, "error");
       }

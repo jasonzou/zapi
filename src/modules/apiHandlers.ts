@@ -198,7 +198,6 @@ export async function handleGetCollections(
     const offset = parseInt(query.get("offset") || "0", 10);
     const sort = query.get("sort") || "name";
     const direction = query.get("direction") || "asc";
-    const includeSubcollections = query.get("includeSubcollections") === "true";
     const parentCollection = query.get("parentCollection");
 
     let collectionIDs;
@@ -220,7 +219,7 @@ export async function handleGetCollections(
       collectionIDs = parent.getChildCollections(true);
     } else {
       collectionIDs = Zotero.Collections.getByLibrary(libraryID).map(
-        (c) => c.id,
+        (c: any) => c.id,
       );
     }
 

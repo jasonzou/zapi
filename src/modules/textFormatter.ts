@@ -68,7 +68,7 @@ export class TextFormatter {
 
     // Headers
     if (options.preserveHeadings) {
-      text = text.replace(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi, (match, level, content) => {
+      text = text.replace(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi, (_match, level, content) => {
         const hashes = '#'.repeat(parseInt(level));
         const cleanContent = this.stripTags(content).trim();
         return `\n\n${hashes} ${cleanContent}\n\n`;
@@ -84,9 +84,9 @@ export class TextFormatter {
     // Lists
     if (options.preserveLists) {
       // Ordered lists
-      text = text.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, content) => {
+      text = text.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (_match, content) => {
         let counter = 1;
-        const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch: string, liContent: string) => {
+        const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (_liMatch: string, liContent: string) => {
           const cleanContent = this.stripTags(liContent).trim();
           return `${counter++}. ${cleanContent}\n`;
         });
@@ -94,8 +94,8 @@ export class TextFormatter {
       });
 
       // Unordered lists
-      text = text.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, content) => {
-        const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch: string, liContent: string) => {
+      text = text.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (_match, content) => {
+        const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (_liMatch: string, liContent: string) => {
           const cleanContent = this.stripTags(liContent).trim();
           return `• ${cleanContent}\n`;
         });
@@ -129,7 +129,7 @@ export class TextFormatter {
 
     // Headers - convert to emphasized text
     if (options.preserveHeadings) {
-      text = text.replace(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi, (match, level, content) => {
+      text = text.replace(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/gi, (_match, level, content) => {
         const cleanContent = this.stripTags(content).trim();
         const indent = '='.repeat(Math.max(1, 7 - parseInt(level)));
         return `\n\n${indent} ${cleanContent.toUpperCase()} ${indent}\n\n`;
@@ -139,9 +139,9 @@ export class TextFormatter {
     // Lists with proper indentation
     if (options.preserveLists) {
       // Ordered lists
-      text = text.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, content) => {
+      text = text.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (_match, content) => {
         let counter = 1;
-        const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch: string, liContent: string) => {
+        const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (_liMatch: string, liContent: string) => {
           const cleanContent = this.stripTags(liContent).trim();
           const indent = ' '.repeat(options.indentSize || 2);
           return `\n${indent}${counter++}. ${cleanContent}`;
@@ -150,8 +150,8 @@ export class TextFormatter {
       });
 
       // Unordered lists
-      text = text.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, content) => {
-        const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (liMatch: string, liContent: string) => {
+      text = text.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (_match, content) => {
+        const listContent = content.replace(/<li[^>]*>(.*?)<\/li>/gi, (_liMatch: string, liContent: string) => {
           const cleanContent = this.stripTags(liContent).trim();
           const indent = ' '.repeat(options.indentSize || 2);
           return `\n${indent}• ${cleanContent}`;
@@ -174,7 +174,7 @@ export class TextFormatter {
     text = text.replace(/<(div|section|article|header|footer|nav)[^>]*>/gi, '');
 
     // Blockquotes with indentation
-    text = text.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis, (match, content) => {
+    text = text.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis, (_match, content) => {
       const cleanContent = this.stripTags(content).trim();
       const indent = ' '.repeat(options.indentSize || 2);
       const indentedText = cleanContent.split('\n').map(line => 

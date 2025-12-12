@@ -4,8 +4,8 @@
       "updates": [
         {
           "version": "0.0.1",
-          "update_link": "https://github.com/jasonzou/zapi/releases/download/v0.0.1/make-it-red.xpi",
-          "update_hash": "sha512:5b217992c1de07507d9f9ac03ca0c031c3a03a85389217144a4633efbf4106408e0daee528e81867683112ecce1e2755c3ef05d836d88aa28f60412f12dd4bd1",
+          "update_link": "https://github.com/jasonzou/zapi/releases/download/v0.0.1/z-api.xpi",
+          "update_hash": "sha512:e47d6edb4955dca0c629580b5742db88a852f6fcb3d1838f8d34f7fb7a71e5fa44476bd92867acc2d9f7818436e2feeef4984ccbaf988884033ed814cd6e2f3f",
           "applications": {
             "zotero": {
               "strict_min_version": "6.999",

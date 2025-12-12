@@ -146,7 +146,7 @@ export class AnnotationService {
         }
 
         const noteIds = parentItem.getNotes(false);
-        items = noteIds.map((id) => Zotero.Items.get(id)).filter(Boolean);
+        items = noteIds.map((id: any) => Zotero.Items.get(id)).filter(Boolean);
       } else {
         // 获取所有笔记
         const search = new Zotero.Search();
@@ -411,7 +411,7 @@ export class AnnotationService {
         type: "note",
         content: noteText,
         text: textContent,
-        tags: item.getTags().map((t) => t.tag),
+        tags: item.getTags().map((t: any) => t.tag),
         dateAdded: item.dateAdded,
         dateModified: item.dateModified,
       };
@@ -476,7 +476,7 @@ export class AnnotationService {
         text: annotationText,
         comment: annotationComment,
         color: annotationColor,
-        tags: item.getTags().map((t) => t.tag),
+        tags: item.getTags().map((t: any) => t.tag),
         dateAdded: item.dateAdded,
         dateModified: item.dateModified,
         page: annotationPageLabel

@@ -1,5 +1,4 @@
 import { StreamableMCPServer } from "./streamableMCPServer";
-import { serverPreferences } from "./serverPreferences";
 import { testMCPIntegration } from "./mcpTest";
 
 declare let ztoolkit: ZToolkit;
@@ -181,7 +180,6 @@ export class HttpServer {
       let input: any = null;
       let output: any = null;
       let sin: any = null;
-      const converterStream: any = null;
 
       ztoolkit.log(`[HttpServer] New connection accepted from transport: ${transport.host || 'unknown'}:${transport.port || 'unknown'}`);
       
@@ -321,7 +319,6 @@ export class HttpServer {
           const method = requestParts[0];
           const urlPath = requestParts[1];
           const url = new URL(urlPath, "http://127.0.0.1");
-          const query = new URLSearchParams(url.search);
           const path = url.pathname;
           
           // 提取POST请求的body

@@ -34,7 +34,7 @@ function initZToolkit(_ztoolkit: ReturnType<typeof createZToolkit>) {
 import { BasicTool, unregister } from "zotero-plugin-toolkit";
 import { UITool } from "zotero-plugin-toolkit";
 
-class MyToolkit extends BasicTool {
+export class MyToolkit extends BasicTool {
   UI: UITool;
 
   constructor() {

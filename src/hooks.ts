@@ -1,7 +1,7 @@
 import { BasicExampleFactory } from "./modules/examples";
 import { httpServer } from "./modules/httpServer"; // 使用单例导出
 import { serverPreferences } from "./modules/serverPreferences";
-import { getString, initLocale } from "./utils/locale";
+import { initLocale } from "./utils/locale";
 import { registerPrefsScripts } from "./modules/preferenceScript";
 import { createZToolkit } from "./utils/ztoolkit";
 import { MCPSettingsService } from "./modules/mcpSettingsService";
@@ -167,7 +167,7 @@ async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
   );
 }
 
-async function onMainWindowUnload(win: Window): Promise<void> {
+async function onMainWindowUnload(_win: Window): Promise<void> {
   ztoolkit.unregisterAll();
 }
 
@@ -339,7 +339,7 @@ function openPreferencesWindow() {
     
     // Fallback: try to open standard preferences
     try {
-      Zotero.getMainWindow().openPreferences();
+      Zotero.getMainWindow()?.openPreferences?.();
     } catch (fallbackError) {
       ztoolkit.log(`[MCP Plugin] Fallback preferences open failed: ${fallbackError}`, "error");
     }

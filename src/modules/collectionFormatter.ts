@@ -1,4 +1,4 @@
-import { formatItem, formatItems } from "./itemFormatter";
+import { formatItems } from "./itemFormatter";
 
 /**
  * Formats a single Zotero collection object into a detailed JSON format.

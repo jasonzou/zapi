@@ -584,7 +584,6 @@ export class UnifiedContentExtractor {
    * Get mode-specific configuration
    */
   private getModeConfiguration(mode: string): any {
-    const presets = MCPSettingsService.getEffectiveSettings();
     
     // Mode-specific configurations based on SmartAnnotationExtractor patterns
     const modeConfigs = {

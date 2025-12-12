@@ -203,7 +203,6 @@ export class IntelligentContentProcessor {
   private calculateTfIdf(sentences: ProcessedSentence[], fullText: string): number[] {
     // Tokenize all text
     const allWords = this.tokenize(fullText.toLowerCase());
-    const wordCount = allWords.length;
     const uniqueWords = [...new Set(allWords)];
     
     // Calculate document frequency for each word
@@ -398,9 +397,9 @@ export class IntelligentContentProcessor {
    * Special selection logic for minimal mode to prioritize main content
    */
   private selectMinimalContent(
-    sentences: ProcessedSentence[], 
-    limits: any, 
-    contentControl: ContentControl
+    sentences: ProcessedSentence[],
+    limits: any,
+    _contentControl: ContentControl
   ): ProcessedSentence[] {
     // First, separate sentences by content type
     const mainContent = sentences.filter(s => s.contentType === 'main_content');
@@ -606,7 +605,7 @@ export class IntelligentContentProcessor {
   /**
    * Detect content sections and classify importance
    */
-  private classifyContentSection(sentence: string, position: number): 'main_content' | 'reference' | 'supplementary' {
+  private classifyContentSection(sentence: string, _position: number): 'main_content' | 'reference' | 'supplementary' {
     // Check for reference
     if (this.isReference(sentence)) {
       return 'reference';

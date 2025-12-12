@@ -1,6 +1,5 @@
 import {
   handleSearch,
-  handleGetItem,
   handleGetCollections,
   handleSearchCollections,
   handleGetCollectionDetails,
@@ -1116,11 +1115,13 @@ export class StreamableMCPServer {
 
   /**
    * Format tool result for MCP response with intelligent content type detection
+   * @deprecated - Not currently used but kept for future reference
    */
-  private formatToolResult(result: any, toolName: string, args: any): any {
+  /*
+  private _formatToolResult(result: any, toolName: string, args: any): any {
     // Check if client explicitly requested text format
     const requestedTextFormat = args?.format === 'text';
-    
+
     // If result is already a string (text format), wrap it in MCP content format
     if (typeof result === 'string') {
       return {
@@ -1133,7 +1134,7 @@ export class StreamableMCPServer {
         isError: false,
       };
     }
-    
+
     // For structured data, provide both JSON and formatted options
     if (typeof result === 'object' && result !== null) {
       // If explicitly requested text format, convert to readable text
@@ -1148,7 +1149,7 @@ export class StreamableMCPServer {
           isError: false,
         };
       }
-      
+
       // Default: provide structured JSON with formatted preview
       return {
         content: [
@@ -1163,7 +1164,7 @@ export class StreamableMCPServer {
         _contentType: 'application/json'
       };
     }
-    
+
     // Fallback for other types
     return {
       content: [
@@ -1175,58 +1176,60 @@ export class StreamableMCPServer {
       isError: false,
     };
   }
+  */
 
-  /**
+  /*
    * Format object as human-readable text based on tool type
-   */
-  private formatObjectAsText(obj: any, toolName: string): string {
+   * @deprecated - Not currently used but kept for future reference
+   *
+  private _formatObjectAsText(obj: any, toolName: string): string {
     switch (toolName) {
       case 'get_content':
-        return this.formatContentAsText(obj);
+        return this._formatContentAsText(obj);
       case 'search_library':
-        return this.formatSearchResultsAsText(obj);
+        return this._formatSearchResultsAsText(obj);
       case 'get_annotations':
-        return this.formatAnnotationsAsText(obj);
+        return this._formatAnnotationsAsText(obj);
       default:
         return JSON.stringify(obj, null, 2);
     }
   }
 
-  private formatContentAsText(contentResult: any): string {
+  private _formatContentAsText(contentResult: any): string {
     const parts = [];
-    
+
     if (contentResult.title) {
       parts.push(`TITLE: ${contentResult.title}\n`);
     }
-    
+
     if (contentResult.content) {
       if (contentResult.content.abstract) {
         parts.push(`ABSTRACT:\n${contentResult.content.abstract.content}\n`);
       }
-      
+
       if (contentResult.content.attachments) {
         for (const att of contentResult.content.attachments) {
           parts.push(`ATTACHMENT (${att.filename || att.type}):\n${att.content}\n`);
         }
       }
-      
+
       if (contentResult.content.notes) {
         for (const note of contentResult.content.notes) {
           parts.push(`NOTE (${note.title}):\n${note.content}\n`);
         }
       }
     }
-    
+
     return parts.join('\n---\n\n');
   }
 
-  private formatSearchResultsAsText(searchResult: any): string {
+  private _formatSearchResultsAsText(searchResult: any): string {
     if (!searchResult.results || !Array.isArray(searchResult.results)) {
       return JSON.stringify(searchResult, null, 2);
     }
-    
+
     const parts = [`SEARCH RESULTS (${searchResult.results.length} items):\n`];
-    
+
     searchResult.results.forEach((item: any, index: number) => {
       parts.push(`${index + 1}. ${item.title || 'Untitled'}`);
       if (item.creators && item.creators.length > 0) {
@@ -1240,17 +1243,17 @@ export class StreamableMCPServer {
       }
       parts.push('');
     });
-    
+
     return parts.join('\n');
   }
 
-  private formatAnnotationsAsText(annotationResult: any): string {
+  private _formatAnnotationsAsText(annotationResult: any): string {
     if (!annotationResult.data || !Array.isArray(annotationResult.data)) {
       return JSON.stringify(annotationResult, null, 2);
     }
-    
+
     const parts = [`ANNOTATIONS (${annotationResult.data.length} items):\n`];
-    
+
     annotationResult.data.forEach((ann: any, index: number) => {
       parts.push(`${index + 1}. [${ann.type.toUpperCase()}] ${ann.content}`);
       if (ann.page) {
@@ -1261,9 +1264,10 @@ export class StreamableMCPServer {
       }
       parts.push('');
     });
-    
+
     return parts.join('\n');
   }
+  */
 
   private createResponse(id: string | number, result: any): MCPResponse {
     return {

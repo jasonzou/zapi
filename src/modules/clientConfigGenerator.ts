@@ -4,7 +4,15 @@
  */
 
 declare let ztoolkit: ZToolkit;
-import { getString } from "../utils/locale";
+import { getString as _getString } from "../utils/locale";
+
+// Wrapper to avoid FluentMessageId type checking for dynamic keys
+const getString = (key: string, options?: any) => {
+  if (options) {
+    return _getString(key as any, options);
+  }
+  return _getString(key as any);
+};
 
 export interface ClientConfig {
   name: string;

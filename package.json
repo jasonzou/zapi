@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A rest api endpoints for Zotero 7",
   "config": {
-    "addonName": "Make It Red",
+    "addonName": "ZApi",
     "addonID": "zapi@gmail.com",
     "addonRef": "zapi",
     "addonInstance": "ZApiPlugin",

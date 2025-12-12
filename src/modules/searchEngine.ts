@@ -249,12 +249,12 @@ function calculateRelevanceScore(
       if (field === "creator") {
         fieldValue = item
           .getCreators()
-          .map((c) => `${c.firstName} ${c.lastName}`)
+          .map((c: any) => `${c.firstName} ${c.lastName}`)
           .join(" ");
       } else if (field === "tags") {
         fieldValue = item
           .getTags()
-          .map((t) => t.tag)
+          .map((t: any) => t.tag)
           .join(" ");
       } else {
         try {
@@ -283,8 +283,8 @@ function calculateRelevanceScore(
   if (params.creator) {
     const creators = item
       .getCreators()
-      .map((c) => `${c.firstName} ${c.lastName}`.toLowerCase());
-    if (creators.some((c) => c.includes(params.creator!.toLowerCase()))) {
+      .map((c: any) => `${c.firstName} ${c.lastName}`.toLowerCase());
+    if (creators.some((c: any) => c.includes(params.creator!.toLowerCase()))) {
       score += fieldWeights.creator || 2.0;
       if (!matchedFields.includes("creator")) matchedFields.push("creator");
     }
@@ -500,7 +500,7 @@ function applyAdvancedFilters(
     if (params.creatorOperator && params.creator) {
       const creators = item
         .getCreators()
-        .map((c) => `${c.firstName} ${c.lastName}`)
+        .map((c: any) => `${c.firstName} ${c.lastName}`)
         .join(" ");
       if (
         !matchesFieldQuery(creators, params.creatorOperator, params.creator)
@@ -714,12 +714,12 @@ export async function handleSearchRequest(
     const tagMode = params.tagMode || "any";
 
     const filteredItems: Zotero.Item[] = [];
-    items.forEach((item) => {
-      const itemTags = item.getTags().map((t) => t.tag);
+    items.forEach((item: any) => {
+      const itemTags = item.getTags().map((t: any) => t.tag);
       const matchedTags: string[] = [];
 
       for (const queryTag of queryTags) {
-        const isMatch = itemTags.some((itemTag) => {
+        const isMatch = itemTags.some((itemTag: any) => {
           switch (tagMatch) {
             case "contains":
               return itemTag.toLowerCase().includes(queryTag.toLowerCase());
@@ -789,7 +789,7 @@ export async function handleSearchRequest(
   let scoredItems: ScoredItem[] = [];
 
   if (useRelevanceScoring) {
-    scoredItems = items.map((item) => {
+    scoredItems = items.map((item: any) => {
       const { score, matchedFields } = calculateRelevanceScore(item, params);
       return {
         item,
@@ -800,7 +800,7 @@ export async function handleSearchRequest(
 
     if (sort === "relevance") {
       // 按相关性排序
-      scoredItems.sort((a, b) => {
+      scoredItems.sort((a: any, b: any) => {
         const scoreA = a.relevanceScore;
         const scoreB = b.relevanceScore;
         return direction === "asc" ? scoreA - scoreB : scoreB - scoreA;
@@ -808,16 +808,16 @@ export async function handleSearchRequest(
       items = scoredItems.map((si) => si.item);
     } else {
       // 非相关性排序，但保留评分信息
-      items.sort((a, b) => {
+      items.sort((a: any, b: any) => {
         let valA: any, valB: any;
         if (sort === "creator") {
           valA = a
             .getCreators()
-            .map((c) => c.lastName)
+            .map((c: any) => c.lastName)
             .join(", ");
           valB = b
             .getCreators()
-            .map((c) => c.lastName)
+            .map((c: any) => c.lastName)
             .join(", ");
         } else {
           valA = a.getField(sort as any) || "";
@@ -833,16 +833,16 @@ export async function handleSearchRequest(
     }
   } else {
     // 传统排序
-    items.sort((a, b) => {
+    items.sort((a: any, b: any) => {
       let valA: any, valB: any;
       if (sort === "creator") {
         valA = a
           .getCreators()
-          .map((c) => c.lastName)
+          .map((c: any) => c.lastName)
           .join(", ");
         valB = b
           .getCreators()
-          .map((c) => c.lastName)
+          .map((c: any) => c.lastName)
           .join(", ");
       } else {
         valA = a.getField(sort as any) || "";
@@ -860,7 +860,7 @@ export async function handleSearchRequest(
   // --- 7. 分页和格式化 ---
   const total = items.length;
   const paginatedItems = items.slice(offset, offset + limit);
-  const results = paginatedItems.map((item) => {
+  const results = paginatedItems.map((item: any) => {
     const formatted = formatItemBrief(item);
 
     // 添加附件路径信息

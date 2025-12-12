@@ -136,7 +136,7 @@ class ServerPreferences {
           const prefService = typeof Services !== 'undefined' && Services.prefs;
           if (prefService) {
             const prefKeys = prefService.getChildList(PREFS_PREFIX);
-            prefKeys.forEach(key => {
+            prefKeys.forEach((key: any) => {
               const value = prefService.getPrefType(key) === prefService.PREF_BOOL ? 
                             prefService.getBoolPref(key) : 
                             prefService.getCharPref(key, 'unknown');

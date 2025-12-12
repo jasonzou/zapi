@@ -11,7 +11,7 @@ export function formatItemBrief(item: Zotero.Item): Record<string, any> {
     title: item.getField("title") || "No Title",
     creators: item
       .getCreators()
-      .map((c) => `${c.firstName || ""} ${c.lastName || ""}`.trim())
+      .map((c: any) => `${c.firstName || ""} ${c.lastName || ""}`.trim())
       .join(", "),
     date: item.getField("date")?.match(/\d{4}/)?.[0] || "", // Extract year
   };
@@ -158,7 +158,7 @@ export async function formatItem(
           break;
         case "creators":
           try {
-            formattedItem[field] = item.getCreators().map((creator) => ({
+            formattedItem[field] = item.getCreators().map((creator: any) => ({
               firstName: safeGetString(creator.firstName),
               lastName: safeGetString(creator.lastName),
               creatorType: safeGetString(
@@ -177,7 +177,7 @@ export async function formatItem(
           try {
             formattedItem[field] = item
               .getTags()
-              .map((tag) => safeGetString(tag.tag));
+              .map((tag: any) => safeGetString(tag.tag));
           } catch (e) {
             ztoolkit.log(`[ItemFormatter] Error getting tags: ${e}`, "error");
             formattedItem[field] = [];
@@ -199,7 +199,7 @@ export async function formatItem(
                   return "";
                 }
               })
-              .filter((note) => note);
+              .filter((note: any) => note);
           } catch (e) {
             ztoolkit.log(`[ItemFormatter] Error getting notes: ${e}`, "error");
             formattedItem[field] = [];
